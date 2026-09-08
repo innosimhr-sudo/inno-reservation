@@ -16,7 +16,7 @@
       background: #f4f6f9;
       color: #1a1f2e;
       min-height: 100vh;
-      padding: 2.5rem 1rem 4rem;
+      padding: 0 1rem 4rem;
     }
 
     /* ★ 페이지 전체 배경 이미지 (나중에 사진 교체 시 이 블록의 url(...)만 변경) */
@@ -49,12 +49,12 @@
         max-width: 460px;
       }
 
-      body { padding: .8rem 1rem 1rem; font-size: 13px; }
+      body { padding: 0 1rem 4rem; font-size: 13px; }
 
       .header { margin-bottom: .6rem; }
       .header h1 { font-size: 14px; }
 
-      .phase-banner { padding: 8px 14px; margin-bottom: .3rem; }
+      .phase-banner { padding: 8px 14px; margin-bottom: 0.4rem; }
       .phase-label { font-size: 12px; }
       .phase-name { font-size: 11px; }
 
@@ -82,15 +82,43 @@
       .submit-btn { height: 47px; padding: 12px; font-size: 12px; }
     }
 
+    /* ── Navigation ── */
+    .site-nav {
+      display: flex; align-items: center; justify-content: flex-end;
+      padding: 0 2.5rem;
+      height: 52px;
+      background: transparent;
+    }
+    .site-nav-logo {
+      font-size: 15px; font-weight: 700;
+      color: #fff; letter-spacing: 0.02em;
+    }
+    .site-nav-links {
+      display: flex; align-items: center; gap: 2rem;
+    }
+    .site-nav-links a {
+      color: rgba(255,255,255,0.72);
+      text-decoration: none;
+      font-size: 13px; font-weight: 700;
+      letter-spacing: 0.03em;
+      padding-bottom: 2px;
+      transition: color .15s;
+    }
+    .site-nav-links a:hover { color: #fff; }
+    .site-nav-links a.active {
+      color: #fff;
+      border-bottom: 2px solid #F57C00;
+    }
+
     /* ── Header ── */
-    .header { text-align: center; margin-bottom: 1.25rem; }
-    .header h1 { font-size: 24px; font-weight: 700; }
+    .header { text-align: center; margin-bottom: 0.5rem; }
+    .header h1 { font-size: 20px; font-weight: 700; }
 
     /* ── Phase Banner ── */
     .phase-banner {
       background: white; border: 1px solid #e2e8f0;
       border-radius: 12px; padding: 14px 18px;
-      margin-bottom: 1.25rem;
+      margin-bottom: 0.5rem;
       display: flex; align-items: center; gap: 12px;
     }
     .phase-pulse {
@@ -103,12 +131,12 @@
     .phase-label { font-size: 11px; color: #999; margin-bottom: 2px; }
     .phase-name { font-size: 14px; font-weight: 700; color: #E65100; }
 
-    /* ── Card ── */
-    .card {
-      background: white; border: 1px solid #e2e8f0;
-      border-radius: 16px; padding: 1.5rem;
-      margin-bottom: 1rem;
-    }
+.card {
+  background: white; border: 1px solid #e2e8f0;
+  border-radius: 16px; padding: 1.5rem 1.5rem;
+  margin-bottom: 1rem;
+}
+
     .card-title {
       font-size: 15px; font-weight: 700;
       display: flex; align-items: center; gap: 9px;
@@ -123,27 +151,42 @@
     }
 
     /* ── Form ── */
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    .form-group { display: flex; flex-direction: column; gap: 5px; }
-    .form-group.full { grid-column: 1 / -1; }
-    label { font-size: 13px; font-weight: 500; color: #444; }
+    .form-grid { display: flex; flex-direction: column; gap: 8px; }
+    .form-group {
+      display: grid;
+      grid-template-columns: 90px 1fr;
+      align-items: center;
+      gap: 0 10px;
+    }
+    .form-group.full { grid-column: auto; }
+    label { font-size: 13px; font-weight: 500; color: #444; white-space: nowrap; }
     label .req { color: #e24b4a; margin-left: 2px; }
-    .label-row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+    /* 휴대폰 행: label-row가 라벨 역할, hint는 입력 옆에 배치 */
+    .label-row {
+      display: contents; /* grid 흐름에 자연스럽게 편입 */
+    }
+    .label-row label { white-space: nowrap; }
+    .label-row .hint { grid-column: 2; font-size: 11px; color: #aaa; margin-top: 2px; }
+    .err-msg { font-size: 11px; color: #e24b4a; display: none; margin-top: 2px; }
+
     input[type="text"], select {
-      height: 40px; border: 1px solid #d1d5db; border-radius: 8px;
+      height: 36px; border: 1px solid #d1d5db; border-radius: 8px;
       padding: 0 12px; font-family: 'Noto Sans KR', sans-serif;
-      font-size: 14px; color: #1a1f2e; background: white;
+      font-size: 13px; color: #1a1f2e; background: white;
       transition: border-color .15s, box-shadow .15s; outline: none;
+      width: 100%;
     }
     input[type="text"]:focus, select:focus {
       border-color: #F57C00;
-      box-shadow: 0 0 0 3px rgba(29,158,117,.12);
+      box-shadow: 0 0 0 3px rgba(245,124,0,.1);
+    }
+    .form-grid input[type="text"],
+    .form-grid select {
+      width: calc(100% - 10px);
+      margin-left: auto;
+      display: block;
     }
     .hint { font-size: 11px; color: #aaa; margin-top: 2px; }
-    .label-row .hint { margin-top: 0; }
-    .err-msg { font-size: 11px; color: #e24b4a; display: none; margin-top: 2px; }
-
-    /* ── Phase 1 notice ── */
     .phase1-notice {
       margin-top: 14px; padding: 10px 14px;
       background: #faeeda; border-radius: 8px;
@@ -206,10 +249,11 @@
 
     /* ── Selection Summary ── */
     .sel-summary {
-      display: none; margin-top: 1.25rem;
+      display: flex; margin-top: 1.25rem;
       background: #FFF8F0; border-radius: 10px;
       padding: 12px 16px;
       align-items: center; justify-content: space-between; gap: 12px;
+      min-height: 72px;
     }
     .sel-dates { font-size: 14px; font-weight: 500; }
     .sel-nights { font-size: 12px; color: #666; margin-top: 3px; }
@@ -231,7 +275,7 @@
     /* ── Cost ── */
     .capped-notice {
       font-size: 11px; color: #aaa;
-      margin-top: 5px;
+      margin-top: 5px; white-space: nowrap;
     }
     .blocked-notice {
       background: #FFEBEE; border: 1px solid #EF9A9A;
@@ -246,7 +290,7 @@
       gap: 10px;
       margin-bottom: 1rem;
     }
-    .cost-card > div { flex-shrink: 0; }
+    .cost-card > div:first-child { flex: 1; min-width: 0; }
     .cost-label { font-size: 13px; font-weight: 700; color: #1a1f2e; margin-bottom: 3px; }
     .cost-nights-txt { font-size: 12px; font-weight: 700; color: #444; white-space: nowrap; }
     .cost-amount { font-size: 20px; font-weight: 700; color: #1a1f2e; white-space: nowrap; }
@@ -298,6 +342,15 @@
 </head>
 <body>
 <div class="page-bg"></div>
+
+<!-- Navigation -->
+<nav class="site-nav">
+  <div class="site-nav-links">
+    <a href="GUIDE_URL" target="_blank">이용안내</a>
+    <a href="#" class="active">예약신청</a>
+  </div>
+</nav>
+
 <div class="container">
 
   <!-- Header -->
@@ -309,7 +362,7 @@
   <div class="phase-banner">
     <div class="phase-pulse"></div>
     <div class="phase-text">
-      <div class="phase-label">현재 신청 기간</div>
+      <div class="phase-label">NOTICE</div>
       <div class="phase-name" id="phaseName">로딩 중...</div>
     </div>
   </div>
@@ -356,8 +409,8 @@
       <!-- Selection summary -->
       <div class="sel-summary" id="selSummary">
         <div>
-          <div class="sel-dates" id="selCheckIn" style="font-size:13px;">—</div>
-          <div class="sel-dates" id="selCheckOut" style="font-size:13px;margin-top:3px;"></div>
+          <div class="sel-dates" id="selCheckIn" style="font-size:13px;">입실 :</div>
+          <div class="sel-dates" id="selCheckOut" style="font-size:13px;margin-top:3px;">퇴실 :</div>
           <div class="sel-nights" id="selNights"></div>
         </div>
         <button class="clear-btn" onclick="clearSelection()">초기화</button>
@@ -370,10 +423,26 @@
         <div class="leg-item"><div class="leg-dot" style="background:#f0f0f0;border:1px solid #ddd;"></div>예약 불가</div>
       </div>
 
+      <div class="blocked-notice" id="blockedNotice">
+        ⛔ 선택하신 기간 중 이미 예약된 날짜가 포함되어 있습니다. 다른 날짜를 선택해 주세요.
+      </div>
+      <div class="cost-card" style="margin-top:1rem;">
+        <div>
+          <div class="cost-label">이용료</div>
+          <div class="cost-nights-txt" id="costNightsTxt">-박 × 50,000원</div>
+          <div class="capped-notice" id="cappedNotice">
+            ✅ 4박 초과시에도 최대이용료 (200,000원)가 적용됩니다.
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div class="cost-amount" id="costAmount">-원</div>
+        </div>
+      </div>
+
       <div class="err-msg" id="dateErr" style="display:none;margin-top:10px;">입실일과 퇴실일을 모두 선택해 주세요.</div>
     </div>
 
-    <!-- Step 2: 신청자 정보 -->
+    <!-- Step 3: 신청자 정보 -->
     <div class="card">
       <div class="card-title">
         <div class="step-badge">2</div>
@@ -382,56 +451,42 @@
       <div class="form-grid">
         <div class="form-group full">
           <label for="name">이름 <span class="req">*</span></label>
-          <input type="text" id="name" placeholder="홍길동">
-          <div class="err-msg" id="nameErr">이름을 입력해 주세요.</div>
+          <div>
+            <input type="text" id="name" placeholder="">
+            <div class="err-msg" id="nameErr">이름을 입력해 주세요.</div>
+          </div>
         </div>
         <div class="form-group full">
           <label for="dept">부서 <span class="req">*</span></label>
-          <select id="dept">
-            <option value="">부서를 선택해 주세요</option>
-            <option>CMO</option>
-            <option>CTO</option>
-            <option>CPO</option>
-            <option>CFO</option>
-            <option>기타</option>
-          </select>
-          <div class="err-msg" id="deptErr">부서를 선택해 주세요.</div>
-        </div>
-        <div class="form-group full">
-          <label for="email">이메일 (회사 계정) <span class="req">*</span></label>
-          <input type="text" id="email" placeholder="example@innosim.com">
-          <div class="err-msg" id="emailErr">올바른 이메일 주소를 입력해 주세요.</div>
-        </div>
-        <div class="form-group full">
-          <div class="label-row">
-            <label for="phone">휴대폰 번호 <span class="req">*</span></label>
-            <div class="hint">하이픈(-) 없이 숫자만 입력해 주세요.</div>
+          <div>
+            <select id="dept">
+              <option value="">부서를 선택해 주세요</option>
+              <option>CMO</option>
+              <option>CTO</option>
+              <option>CPO</option>
+              <option>CFO</option>
+              <option>기타</option>
+            </select>
+            <div class="err-msg" id="deptErr">부서를 선택해 주세요.</div>
           </div>
-          <input type="text" id="phone" placeholder="01012345678" maxlength="11">
-          <div class="err-msg" id="phoneErr">올바른 휴대폰 번호를 입력해 주세요. (11자리 숫자)</div>
+        </div>
+        <div class="form-group full">
+          <label for="email">이메일(회사 계정) <span class="req">*</span></label>
+          <div>
+            <input type="text" id="email" placeholder="****@innosim.com">
+            <div class="err-msg" id="emailErr">올바른 이메일 주소를 입력해 주세요.</div>
+          </div>
+        </div>
+        <div class="form-group full">
+          <label for="phone">휴대폰 번호 <span class="req">*</span></label>
+          <div>
+            <input type="text" id="phone" placeholder="하이픈(-) 없이 숫자만 입력해 주세요" maxlength="11">
+            <div class="err-msg" id="phoneErr">올바른 휴대폰 번호를 입력해 주세요. (11자리 숫자)</div>
+          </div>
         </div>
       </div>
       <div class="phase1-notice" id="phase1Notice">
         ⚠️ <strong>Phase 1 우선 신청 기간</strong>입니다. 이 기간은 전체 재직 기간 중 숙소를 한 번도 이용하지 않은 직원을 위한 우선 신청 기간입니다. 이용 이력이 확인될 경우 신청이 취소될 수 있습니다.
-      </div>
-    </div>
-
-    <!-- Step 3: 비용 확인 -->
-    <div id="costSection" style="display:none;">
-      <div class="blocked-notice" id="blockedNotice">
-        ⛔ 선택하신 기간 중 이미 예약된 날짜가 포함되어 있습니다. 다른 날짜를 선택해 주세요.
-      </div>
-      <div class="cost-card">
-        <div>
-          <div class="cost-label">예상 이용료</div>
-          <div class="cost-nights-txt" id="costNightsTxt">—</div>
-          <div class="capped-notice" id="cappedNotice">
-            ✅ 4박 초과시 최대이용료 (200,000원)가 적용됩니다.
-          </div>
-        </div>
-        <div style="text-align:right;">
-          <div class="cost-amount" id="costAmount">0원</div>
-        </div>
       </div>
     </div>
 
@@ -680,37 +735,37 @@ function nextMonth() {
 
 // ── Summary & Cost ────────────────────────────────────────
 function updateSummary() {
-  const sumEl  = document.getElementById('selSummary');
-  const costEl = document.getElementById('costSection');
+  const sumEl = document.getElementById('selSummary');
 
   if (checkIn && checkOut) {
     const nights = Math.round((checkOut - checkIn) / 864e5);
     const cost   = Math.min(nights * 50000, 200000);
 
-    document.getElementById('selCheckIn').textContent  = '입실일 : ' + fmt(checkIn);
-    document.getElementById('selCheckOut').textContent = '퇴실일 : ' + fmt(checkOut);
+    document.getElementById('selCheckIn').textContent  = '입실 : ' + fmt(checkIn) + ' 오후 2시부터';
+    document.getElementById('selCheckOut').textContent = '퇴실 : ' + fmt(checkOut) + ' 오전 11시까지';
     document.getElementById('selNights').textContent   = nights + '박 ' + (nights + 1) + '일';
-    document.getElementById('costNightsTxt').textContent =
-      nights + '박 × 50,000원';
-    document.getElementById('costAmount').textContent =
-      cost.toLocaleString() + '원';
+    document.getElementById('costNightsTxt').textContent = nights + '박 × 50,000원';
+    document.getElementById('costAmount').textContent    = cost.toLocaleString() + '원';
 
-    // 선택 범위 내 예약불가일 포함 여부 확인
     const hasBlocked = rangeHasBlockedDate(checkIn, checkOut);
     document.getElementById('blockedNotice').style.display = hasBlocked ? 'block' : 'none';
     document.getElementById('submitBtn').disabled = hasBlocked;
 
-    sumEl.style.display  = 'flex';
-    costEl.style.display = 'block';
+    sumEl.style.visibility = 'visible';
   } else if (checkIn) {
-    document.getElementById('selCheckIn').textContent  = '입실일 : ' + fmt(checkIn);
+    document.getElementById('selCheckIn').textContent  = '입실 : ' + fmt(checkIn) + ' 14:00부터';
     document.getElementById('selCheckOut').textContent = '퇴실일을 선택해 주세요';
     document.getElementById('selNights').textContent   = '';
-    sumEl.style.display  = 'flex';
-    costEl.style.display = 'none';
+    document.getElementById('costNightsTxt').textContent = '-박 × 50,000원';
+    document.getElementById('costAmount').textContent    = '-원';
+    document.getElementById('blockedNotice').style.display = 'none';
+
   } else {
-    sumEl.style.display  = 'none';
-    costEl.style.display = 'none';
+    document.getElementById('selCheckIn').textContent  = '입실 :';
+    document.getElementById('selCheckOut').textContent = '퇴실 :';
+    document.getElementById('selNights').textContent   = '';
+    document.getElementById('costNightsTxt').textContent = '-박 × 50,000원';
+    document.getElementById('costAmount').textContent    = '-원';
     document.getElementById('blockedNotice').style.display = 'none';
     document.getElementById('submitBtn').disabled = false;
   }
@@ -820,8 +875,8 @@ function showSuccess(p) {
     ['부서',   p.dept],
     ['이메일', p.email],
     ['휴대폰', p.phone.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3')],
-    ['입실일', p.checkIn],
-    ['퇴실일', p.checkOut],
+    ['입실', p.checkIn + ' 14:00'],
+    ['퇴실', p.checkOut + ' 11:00'],
     ['이용 박수', p.nights + '박'],
     ['이용금액', p.cost.toLocaleString() + '원'],
     // ['신청 구분', p.phase]  // 제거
