@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#ffffff">
   <title>직원 숙소 예약 신청 | 이노시뮬레이션</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -15,23 +13,29 @@
       --brand: #F57C00;
       --brand-deep: #E65100;
       --brand-soft: #FFF3E0;
-      --ink: #191f28;
-      --ink-2: #4e5968;
-      --ink-3: #8b95a1;
-      --ink-4: #c9ced4;
+      --text: #262626;        /* 일반 글자 */
+      --text-weak: #A6A6A6;   /* 약한 글자: 이용안내 탭 · 입력 예시 · 예약불가 날짜 */
       --line: #e5e8eb;
       --line-soft: #f0f2f4;
       --fill: #f5f6f8;
       --danger: #e24b4a;
-      --cell: 33.5px;
       --pad: 22px;
-      --font: 'Pretendard', 'Noto Sans KR', -apple-system, 'Malgun Gothic', sans-serif;
+      --font: 'Pretendard', -apple-system, 'Malgun Gothic', sans-serif;
+
+      /* 높이 관련 값 (PC에서는 창 높이에 맞춰 자동 조절 — 아래 @media 참고) */
+      --cell: 33px;      /* 달력 한 주 높이 */
+      --inp: 40px;       /* 입력칸 높이 */
+      --secpad: 14px;    /* 섹션 위아래 여백 */
+      --btn: 50px;       /* 제출 버튼 높이 */
+      --bar: 54px;       /* 상단 바 높이 */
+      --nm: 12px;        /* 안내 패널 위아래 여백 */
+      --fgap: 4px;       /* 입력칸 사이 간격 */
     }
 
     html, body { height: 100%; }
     body {
       font-family: var(--font); font-size: 14px;
-      background: #1a1f2e; color: var(--ink);
+      background: #1a1f2e; color: var(--text);
       letter-spacing: -0.01em; -webkit-font-smoothing: antialiased;
     }
     button, input, select { font-family: inherit; }
@@ -50,83 +54,87 @@
       background-attachment: fixed;
     }
 
-    /* ── 앱 패널 (PC·모바일 공통) ── */
+    /* ── 신청 패널 ── */
     .container {
       background: #fff;
       box-shadow: 0 24px 60px rgba(0,0,0,.30);
       padding: 0 var(--pad);
+      /* 글꼴이 바뀌는 순간이 보이지 않도록 숨겨 두었다가 표시.
+         스크립트가 .fonts-ready 를 붙이면 바로, 아니어도 0.8초 뒤에는 반드시 나타난다 */
+      opacity: 0;
+      transition: opacity .15s ease;
+      animation: panel-in .15s ease .8s forwards;
     }
+    .fonts-ready .container { opacity: 1; animation: none; }
+    @keyframes panel-in { to { opacity: 1; } }
 
-    /* ── 앱 바: 제목 + 이용안내/예약신청 탭 ── */
+    /* ── 상단 바: 제목(왼쪽) + 탭(오른쪽) 한 줄 ── */
     .appbar {
       position: sticky; top: 0; z-index: 6;
+      display: flex; align-items: stretch; justify-content: space-between;
+      height: var(--bar);
       margin: 0 calc(var(--pad) * -1); padding: 0 var(--pad);
       background: rgba(255,255,255,.97);
       backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--line);
     }
-    .appbar-top { display: flex; align-items: center; gap: 8px; height: 52px; }
+    .appbar-top { display: flex; align-items: center; gap: 8px; }
     .brand-mark {
-      width: 28px; height: 28px; border-radius: 9px; background: var(--brand);
-      display: grid; place-items: center; font-size: 14px; flex-shrink: 0;
+      width: 26px; height: 26px; border-radius: 8px; background: var(--brand); color: #fff;
+      display: grid; place-items: center; flex-shrink: 0; font-size: 14px; line-height: 1;
     }
-    .appbar h1 { font-size: 17px; font-weight: 800; letter-spacing: -0.02em; }
-    .appbar h1 span { color: var(--brand-deep); }
-    .tabs { display: flex; }
+    .appbar h1 { font-size: 16px; font-weight: 700; letter-spacing: -0.02em; white-space: nowrap; }
+    .tabs { display: flex; gap: 16px; }
     .tab {
-      flex: 1; height: 42px; line-height: 42px; text-align: center;
-      font-size: 15px; font-weight: 700; color: var(--ink-3);
-      text-decoration: none; position: relative; transition: color .15s;
+      display: flex; align-items: center; position: relative;
+      font-size: 14px; font-weight: 500; color: var(--text-weak);
+      text-decoration: none; white-space: nowrap; transition: color .15s;
     }
-    .tab:hover { color: var(--ink-2); }
-    .tab.active { color: var(--ink); }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--text); font-weight: 700; }
     .tab.active::after {
-      content: ''; position: absolute; left: 25%; right: 25%; bottom: -1px;
-      height: 3px; border-radius: 3px; background: var(--ink);
+      content: ''; position: absolute; left: 0; right: 0; bottom: -1px;
+      height: 2px; background: var(--text);
     }
 
-    /* 공지(웹훅 안내문): 카드 + 스피커 아이콘, 두 줄 높이 고정, 세로 중앙 정렬 */
+    /* ── 안내 패널: 두 줄 높이를 미리 확보, 글이 더 길면 늘어남 ── */
     .phase-banner {
       display: flex; align-items: center; gap: 10px;
-      min-height: 62px; height: auto !important; margin: 12px 0 !important; padding: 10px 14px !important;
-      background: var(--fill); border: 0; border-radius: 12px;
-      overflow: hidden;
+      min-height: 50px; margin: var(--nm) 0; padding: 5px 12px;
+      background: var(--fill); border-radius: 10px;
     }
     .phase-pulse {
-      width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+      width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
       background: var(--brand-soft); color: var(--brand);
       display: grid; place-items: center;
     }
-    .phase-text { flex: 1; min-width: 0; display: flex; align-items: center; }
-    .phase-label { display: none; }
-    .phase-name {
-      font-size: 14px !important; font-weight: 600; color: var(--ink); line-height: 21px;
-    }
+    .phase-text { flex: 1; min-width: 0; }
+    .phase-name { font-size: 14px; font-weight: 500; color: var(--text); line-height: 20px; }
 
-    /* ── 섹션: 카드 대신 구분선 ── */
-    .sec { padding: 14px 0; }
-    .sec + .sec { border-top: 1px solid var(--line); }
+    /* ── 섹션 ── */
+    .sec { padding: var(--secpad) 0; }
+    .sec + .sec { border-top: 1px solid var(--line); padding-bottom: 0; }
     .sec-title {
-      display: flex; align-items: center; gap: 8px;
-      font-size: 15px; font-weight: 800; margin-bottom: 10px;
+      display: flex; align-items: center; gap: 8px; height: 20px;
+      font-size: 14px; font-weight: 700; margin-bottom: 4px;
     }
     .step-badge {
-      width: 20px; height: 20px; border-radius: 50%;
-      background: var(--ink); color: #fff; font-size: 12px; font-weight: 800;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: var(--text); color: #fff; font-size: 13px; font-weight: 700; line-height: 1;
       display: grid; place-items: center; flex-shrink: 0;
     }
     .legend { margin-left: auto; display: flex; gap: 8px; }
-    .leg-item { display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 500; color: var(--ink-3); }
-    .leg-dot { width: 9px; height: 9px; border-radius: 3px; flex-shrink: 0; }
+    .leg-item { display: flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 500; color: var(--text); }
+    .leg-x { width: 10px; height: 10px; border-radius: 3px; background: #f0f0f0; border: 1px solid #ddd; }
 
-    /* ── 입실 < > 퇴실 바 ── */
+    /* ── 입실 · 퇴실 ── */
     .datebar {
       display: grid; grid-template-columns: 1fr auto 1fr; align-items: stretch;
-      border-bottom: 1px solid var(--line); margin-bottom: 8px;
+      border-bottom: 1px solid var(--line); margin-bottom: 4px;
     }
     .db-box {
       background: none; border: 0; text-align: left; cursor: pointer;
-      padding: 2px 2px 10px; position: relative; color: inherit;
+      padding: 0 2px 6px; position: relative; color: inherit;
     }
     .db-box.out { text-align: right; }
     .db-box::after {
@@ -134,206 +142,234 @@
       background: transparent; transition: background .15s;
     }
     .db-box.active::after { background: var(--brand); }
-    .db-lbl { font-size: 13px; font-weight: 600; color: var(--ink-3); }
-    .db-box.active .db-lbl { color: var(--brand-deep); }
-    .db-date { font-size: 17px; font-weight: 800; margin-top: 2px; color: var(--ink); }
-    .db-date.empty { color: var(--ink-4); font-weight: 700; }
-    .db-time { font-size: 14px; color: var(--ink-3); margin-top: 1px; }
-    .db-mid { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 0 8px 8px; }
+    .db-lbl { font-size: 14px; font-weight: 500; color: var(--text); line-height: 18px; }
+    .db-box.active .db-lbl { font-weight: 700; }
+    .db-time { font-size: 14px; font-weight: 700; color: var(--text); margin-left: 2px; }
+    .db-date { font-size: 16px; font-weight: 700; line-height: 22px; color: var(--text); }
+    .db-date.empty { font-weight: 500; }
+    .db-mid { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; padding: 0 8px 4px; }
     .db-nights {
-      font-size: 14px; font-weight: 800; color: var(--ink-2);
-      border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; white-space: nowrap;
+      font-size: 14px; font-weight: 700; color: var(--text); line-height: 18px;
+      border: 1px solid var(--line); border-radius: 999px; padding: 1px 10px; white-space: nowrap;
     }
-    .db-nights.on { color: var(--brand-deep); border-color: var(--brand); }
+    .db-nights.on { border-color: var(--brand); background: var(--brand-soft); }
     .clear-btn {
-      background: none; border: 0; font-size: 14px; color: var(--ink-3);
+      background: none; border: 0; font-size: 14px; line-height: 18px; color: var(--text);
       text-decoration: underline; text-underline-offset: 2px; cursor: pointer;
     }
-    .clear-btn:hover { color: var(--ink); }
+    .clear-btn:hover { color: var(--text); }
 
-    /* 원본 요약 영역: 스크립트 연동용으로 유지, 화면에는 위 바로 대체 */
-    .sel-summary { display: none !important; }
 
-    /* ── Calendar (한 달씩) ── */
-    .cal-wrapper { display: block; }
-    .cal-month2 { display: none !important; }
-    .month-nav { display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 2px; }
-    .month-title { font-size: 15px; font-weight: 800; }
+    /* ── 달력 (한 달씩, 항상 6주 높이) ── */
+    .month-nav { display: flex; align-items: center; justify-content: center; gap: 12px; height: 28px; }
+    .month-title { font-size: 14px; font-weight: 700; }
     .nav-btn {
-      width: 32px; height: 32px; border-radius: 8px; border: 0; background: none;
-      color: var(--ink-2); font-size: 22px; line-height: 1; cursor: pointer;
+      width: 28px; height: 28px; border-radius: 50%; border: 0; background: none;
+      color: var(--text); font-size: 20px; line-height: 1; cursor: pointer;
       display: grid; place-items: center; transition: background .15s;
     }
-    .nav-btn:hover:not(:disabled) { background: var(--fill); color: var(--brand-deep); }
+    .nav-btn:hover:not(:disabled) { background: var(--fill); }
     .nav-btn:disabled { opacity: .25; cursor: not-allowed; }
 
-    .weekdays { display: grid; grid-template-columns: repeat(7,1fr); text-align: center; }
-    .wd { font-size: 13px; font-weight: 600; color: var(--ink-3); padding: 4px 0; }
-    .wd:first-child { color: var(--danger); }
-    .wd:last-child { color: #4a90d9; }
+    .weekdays { display: grid; grid-template-columns: repeat(7,1fr); text-align: center; height: 20px; align-items: center; }
+    .wd { font-size: 13px; font-weight: 500; color: var(--text); }
 
-    .days { display: grid; grid-template-columns: repeat(7,1fr); }
+    .days {
+      display: grid; grid-template-columns: repeat(7,1fr); grid-auto-rows: var(--cell);
+      min-height: calc(var(--cell) * 6);   /* 5주인 달도 6주 높이를 확보해 패널이 출렁이지 않게 */
+      align-content: start;
+    }
     .day {
-      height: var(--cell); display: flex; align-items: center; justify-content: center;
-      font-size: 14px; font-weight: 600; color: var(--ink);
-      border-radius: 8px; cursor: pointer; position: relative; user-select: none;
-      transition: background .1s, color .1s;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 500; color: var(--text);
+      cursor: pointer; position: relative; isolation: isolate; user-select: none;
     }
     .empty { cursor: default; }
-    .day.disabled, .day.blocked { color: var(--ink-4); cursor: not-allowed; font-weight: 400; }
+    .day.disabled, .day.blocked { color: var(--text-weak); cursor: not-allowed; font-weight: 400; }
     .day.blocked { text-decoration: line-through; }
+    /* 동그라미(호버·선택) */
+    .day::before {
+      content: ''; position: absolute; top: 50%; left: 50%; z-index: -1;
+      width: calc(var(--cell) - 3px); height: calc(var(--cell) - 3px);
+      transform: translate(-50%,-50%); border-radius: 50%;
+      background: transparent; transition: background .1s;
+    }
+    .day:hover:not(.disabled):not(.empty):not(.check-in):not(.check-out):not(.blocked):not(.in-range)::before {
+      background: var(--fill);
+    }
     .day.today::after {
-      content: ''; position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%);
+      content: ''; position: absolute; bottom: 1px; left: 50%; transform: translateX(-50%);
       width: 4px; height: 4px; border-radius: 50%; background: var(--brand);
     }
-    .day:hover:not(.disabled):not(.empty):not(.check-in):not(.check-out):not(.blocked) {
-      background: var(--brand-soft); color: var(--brand-deep);
+    /* 선택 기간: 입실·퇴실은 동그라미, 사이는 연한 띠로 연결 */
+    .day.in-range {
+      background: linear-gradient(var(--brand-soft), var(--brand-soft)) center / 100% calc(100% - 7px) no-repeat;
     }
-    .day.in-range { background: var(--brand-soft); color: var(--brand-deep); border-radius: 0; }
-    .day.check-in, .day.check-out { background: var(--brand); color: #fff; font-weight: 800; }
+    .day.check-in, .day.check-out { color: #fff; font-weight: 700; }
+    .day.check-in::before, .day.check-out::before { background: var(--brand); }
+    .day.range-start {
+      background: linear-gradient(var(--brand-soft), var(--brand-soft)) right center / 50% calc(100% - 7px) no-repeat;
+    }
+    .day.range-end {
+      background: linear-gradient(var(--brand-soft), var(--brand-soft)) left center / 50% calc(100% - 7px) no-repeat;
+    }
     .day.check-in.today::after, .day.check-out.today::after { background: #fff; }
 
-    /* ── 이용료: 박스 없이 한 줄 ── */
+    /* ── 이용료: 영수증처럼 점선으로 연결 ── */
     .cost-card {
-      display: grid; grid-template-columns: 1fr auto; align-items: baseline; column-gap: 12px;
-      margin-top: 16px; padding-top: 0; border-top: 0;
+      display: grid; grid-template-columns: auto 1fr auto; align-items: baseline;
+      margin-top: 6px;
     }
-    .cost-top { grid-column: 2; grid-row: 1; }
-    .cost-label { display: none; }
-    .cost-amount { font-size: 20px; font-weight: 800; white-space: nowrap; }
-    .cost-nights-txt { grid-column: 1; grid-row: 1; font-size: 14px; font-weight: 600; color: var(--ink-2); }
-    .cost-nights-txt::before { content: '이용료  '; white-space: pre; color: var(--ink-3); font-weight: 500; }
-    .capped-notice { grid-column: 1 / 3; grid-row: 2; font-size: 13px; color: var(--ink-3); margin-top: 4px; }
+    .cost-card::before {
+      content: ''; grid-column: 2; grid-row: 1; align-self: end;
+      margin: 0 8px 5px; border-bottom: 1px dotted var(--text-weak);
+    }
+    .cost-top { grid-column: 3; grid-row: 1; }
+    .cost-amount { font-size: 20px; font-weight: 700; line-height: 24px; white-space: nowrap; }
+    .cost-nights-txt { grid-column: 1; grid-row: 1; font-size: 14px; font-weight: 500; color: var(--text); }
+    .cost-nights-txt::before { content: '이용료  '; white-space: pre; color: var(--text); }
+    .capped-notice {
+      grid-column: 1 / 4; grid-row: 2; display: flex; align-items: center; gap: 5px;
+      font-size: 13px; line-height: 18px; color: var(--text); margin-top: 2px;
+    }
+    .capped-notice svg { flex-shrink: 0; color: var(--brand); }
 
     .blocked-notice {
       display: none; margin-top: 8px; padding-left: 10px; border-left: 3px solid var(--danger);
-      font-size: 13px; font-weight: 600; color: #C62828; line-height: 1.5;
+      font-size: 13px; font-weight: 500; color: #C62828; line-height: 1.5;
     }
 
-    /* ── Form ── */
-    .form-grid { display: flex; flex-direction: column; gap: 8px; }
-    .form-group { display: grid; grid-template-columns: 104px 1fr; align-items: start; gap: 0 8px; }
-    label { font-size: 14px; font-weight: 600; color: var(--ink-2); line-height: 40px; white-space: nowrap; }
-    label .req { color: var(--brand); margin-left: 2px; }
+    /* ── 신청자 정보 ── */
+    .form-grid { display: flex; flex-direction: column; gap: var(--fgap); }
+    .form-group { display: grid; grid-template-columns: 100px 1fr; align-items: start; gap: 0 8px; }
+    label { font-size: 14px; font-weight: 500; color: var(--text); line-height: var(--inp); white-space: nowrap; }
+    label .req { margin-left: 2px; }
     input[type="text"], select {
-      width: 100%; height: 40px; padding: 0 2px;
+      width: 100%; height: var(--inp); padding: 0 2px;
       border: 0; border-bottom: 1px solid var(--line); border-radius: 0;
-      background: transparent; color: var(--ink);
-      font-size: 14px; font-weight: 500; outline: none; transition: border-color .15s;
+      background: transparent; color: var(--text);
+      font-size: 14px; font-weight: 500; outline: none;
+      transition: border-color .15s, box-shadow .15s;
     }
     select {
       appearance: none; -webkit-appearance: none; cursor: pointer;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238b95a1' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
       background-repeat: no-repeat; background-position: right 4px center;
     }
-    input::placeholder { color: var(--ink-3); font-weight: 400; }
-    input[type="text"]:focus, select:focus { border-bottom: 2px solid var(--brand); }
-    .err-msg { display: none; font-size: 13px; font-weight: 600; color: var(--danger); margin-top: 4px; }
+    input::placeholder { color: var(--text-weak); font-weight: 400; }
+    select:has(option[value=""]:checked) { color: var(--text-weak); font-weight: 400; }
+    select option { color: var(--text); }
+    /* 선택된 칸: 선 굵기를 바꾸지 않고 그림자로 표시(글자 흔들림 없음) */
+    input[type="text"]:focus, select:focus { border-bottom-color: var(--brand); box-shadow: 0 1px 0 var(--brand); }
+    .err-msg { display: none; font-size: 13px; font-weight: 500; color: var(--danger); margin: 2px 0 4px; }
     .phase1-notice {
-      display: none; margin-top: 12px; padding-left: 10px; border-left: 3px solid var(--brand);
-      font-size: 13px; color: #854f0b; line-height: 1.6;
+      display: none; margin-top: 10px; padding-left: 10px; border-left: 3px solid var(--brand);
+      font-size: 13px; color: var(--text); line-height: 1.6;
     }
 
-    /* ── Submit (하단 고정) ── */
+    /* ── 제출 (하단 고정) ── */
     .submit-bar {
       position: sticky; bottom: 0; z-index: 5;
-      margin: 0 calc(var(--pad) * -1); padding: 12px var(--pad) 14px;
-      background: linear-gradient(to bottom, rgba(255,255,255,0), #fff 14px); border-top: 0;
+      margin: 0 calc(var(--pad) * -1); padding: 14px;   /* 버튼 좌우·상하 여백 동일 */
+      background: linear-gradient(to bottom, rgba(255,255,255,0), #fff 10px);
     }
     .submit-btn {
-      width: 100%; height: 50px; border: none; border-radius: 12px;
+      width: 100%; height: var(--btn); border: none; border-radius: 12px;
       background: var(--brand-deep); color: #fff;
-      font-size: 16px; font-weight: 800; cursor: pointer;
+      font-size: 16px; font-weight: 700; cursor: pointer;
       transition: background .15s, transform .1s;
     }
     .submit-btn:hover:not(:disabled) { background: #BF360C; }
     .submit-btn:active:not(:disabled) { transform: scale(.99); }
     .submit-btn:disabled { background: #b0b8c1; cursor: not-allowed; }
-    .submit-note { text-align: center; font-size: 13px; color: var(--ink-3); margin: 0 0 8px; }
+    .submit-note { text-align: center; font-size: 13px; line-height: 16px; color: var(--text); margin: 0 0 4px; }
 
-    /* ── Success ── */
-    .success-screen { display: none; padding: 24px 0 20px; }
-    .success-msg { text-align: left; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+    /* ── 접수 완료 ── */
+    .success-screen { display: none; padding: 20px 0 16px; }
+    .success-msg { text-align: left; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
     .success-text { text-align: left; }
     .success-icon {
-      width: 56px; height: 56px; border-radius: 50%; background: var(--brand); color: #fff;
-      margin: 0 auto 14px; display: grid; place-items: center; font-size: 26px; font-weight: 800;
+      width: 52px; height: 52px; border-radius: 50%; background: var(--brand); color: #fff;
+      margin: 0 auto 12px; display: grid; place-items: center; font-size: 24px; font-weight: 700;
       animation: pop .45s cubic-bezier(.2,1.4,.4,1);
     }
     @keyframes pop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-    .success-screen h2 { font-size: 20px; font-weight: 800; margin-bottom: 6px; }
-    .success-screen p { font-size: 14px; color: var(--ink-2); line-height: 1.6; }
+    .success-screen h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .success-screen p { font-size: 14px; color: var(--text); line-height: 1.6; }
+    .success-screen p + p { margin-top: 10px; }
     .success-detail { padding-top: 4px; font-size: 14px; }
-    .detail-row { display: flex; justify-content: space-between; gap: 16px; padding: 9px 0; border-bottom: 1px solid var(--line-soft); }
+    .detail-row { display: flex; justify-content: space-between; gap: 16px; padding: 8px 0; border-bottom: 1px solid var(--line-soft); }
     .detail-row:last-child { border-bottom: none; }
-    .detail-row:last-child .detail-val { color: var(--brand-deep); font-size: 16px; font-weight: 800; }
-    .detail-key { color: var(--ink-3); flex-shrink: 0; }
+    .detail-row:last-child .detail-val { font-size: 16px; }
+    .detail-key { color: var(--text); flex-shrink: 0; }
     .detail-val { font-weight: 700; text-align: right; word-break: break-all; }
 
     /* =========================================================
-       PC / 태블릿 (≥ 640px) : 배경 위 오른쪽에 떠 있는 앱 화면
+       PC / 태블릿 (≥ 640px) : 배경 위 오른쪽 패널
+       - 창 높이 690px(1920×1080 · 125% 배율의 브라우저 창)에서 스크롤 없이 딱 맞고,
+         창이 더 높으면 880px까지 칸·여백이 비례해서 넉넉해짐
        ========================================================= */
     @media (min-width: 640px) {
+      :root {
+        --cell:   clamp(24.5px, calc(4.474vh - 6.37px), 33px);
+        --inp:    clamp(30px, calc(5.263vh - 6.32px), 40px);
+        --secpad: clamp(7px,  calc(3.684vh - 18.42px), 14px);
+        --btn:    clamp(40px, calc(5.263vh + 3.68px), 50px);
+        --bar:    clamp(46px, calc(4.211vh + 16.95px), 54px);
+        --nm:     clamp(6px,  calc(3.158vh - 15.79px), 12px);
+        --fgap:   clamp(2px,  calc(1.053vh - 5.26px), 4px);
+        --stage:  clamp(10px, calc(7.368vh - 40.84px), 24px);
+      }
       body { height: 100vh; overflow: hidden; }
       .stage {
         height: 100%;
-        display: flex; align-items: center; justify-content: flex-end;
-        padding: 24px 56px;
+        display: flex; align-items: flex-start; justify-content: flex-end;
+        padding: var(--stage);   /* 위쪽 여백 = 오른쪽 여백 */
       }
       .container {
         width: 380px; max-height: 100%; overflow-y: auto; scrollbar-width: thin;
-        border-radius: 24px;
+        border-radius: 20px;
       }
     }
-    /* 창 높이가 낮을 때: 글자 크기는 유지하고 여백·칸 높이만 줄임 */
-    @media (min-width: 640px) and (max-height: 940px) {
-      :root { --cell: 29.5px; }
-      .stage { padding-top: 16px; padding-bottom: 16px; }
-      .appbar-top { height: 46px; }
-      .tab { height: 38px; line-height: 38px; }
-      .phase-banner { padding: 8px 0; }
-      .sec { padding: 10px 0; }
-      .sec-title { margin-bottom: 6px; }
-      .db-box { padding-bottom: 6px; }
-      .cost-card { margin-top: 12px; }
-      .form-grid { gap: 4px; }
-      input[type="text"], select { height: 36px; }
-      label { line-height: 36px; }
-      .submit-bar { padding-top: 10px; padding-bottom: 10px; }
-      .submit-btn { height: 46px; }
-      .submit-note { margin-bottom: 6px; }
+    /* 창이 낮을 때는 버튼 위 안내 문구를 숨겨 높이 확보 (같은 내용이 접수 완료 화면에 나옴) */
+    @media (min-width: 640px) and (max-height: 889px) {
+      .submit-note { display: none; }
     }
 
     /* =========================================================
-       모바일 (< 640px) : 같은 앱 화면을 전체 폭으로
+       모바일 (< 640px)
        ========================================================= */
     @media (max-width: 639px) {
-      :root { --cell: 43.5px; --pad: 18px; }
+      :root { --cell: 43.5px; --pad: 18px; --inp: 48px; --btn: 54px; --bar: 54px; --secpad: 16px; --fgap: 6px; }
       body { font-size: 15px; }
       .stage { padding-top: 22vh; }
       .container { border-radius: 24px 24px 0 0; min-height: 78vh; }
       .appbar { border-radius: 24px 24px 0 0; }
       .phase-name { font-size: 15px; }
-      .sec-title { font-size: 16px; flex-wrap: wrap; }
-      .db-date { font-size: 18px; }
-      .month-title { font-size: 17px; }
+      .sec-title { font-size: 16px; height: 24px; margin-bottom: 10px; }
+      .db-date { font-size: 18px; line-height: 26px; }
+      .db-box { padding-bottom: 10px; }
+      .datebar { margin-bottom: 8px; }
+      .phase-banner { min-height: 56px; padding: 8px 12px; }
+      .month-nav { height: 40px; }
+      .month-title { font-size: 16px; }
       .nav-btn { width: 40px; height: 40px; font-size: 26px; }
-      .day { font-size: 16px; border-radius: 12px; }
+      .weekdays { height: 28px; }
+      .day { font-size: 16px; }
+      .days { min-height: 0; }
+      .cost-card { margin-top: 12px; }
       .form-group { grid-template-columns: 1fr; }
       label { line-height: 1.4; margin-top: 6px; }
-      input[type="text"], select { height: 48px; font-size: 16px; }  /* iOS 확대 방지 */
-      .submit-bar { padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
-      .submit-btn { height: 54px; }
+      input[type="text"], select { font-size: 16px; }  /* iOS 확대 방지 */
+      .submit-bar { padding: 18px 18px calc(18px + env(safe-area-inset-bottom)); }
+      .submit-note { margin-bottom: 8px; }
     }
-    /* =========================================================
-       500px 이하 : 배경 사진 숨김, 신청 패널을 화면에 꽉 차게
-       ========================================================= */
+    /* 500px 이하 : 배경 사진 숨김, 신청 패널을 화면에 꽉 차게 */
     @media (max-width: 500px) {
       .page-bg { display: none; }
       body { background: #fff; }
       .stage { padding-top: 0; }
       .container { border-radius: 0; min-height: 100vh; box-shadow: none; }
-      .container::before { display: none; }
       .appbar { border-radius: 0; }
     }
   </style>
@@ -344,7 +380,7 @@
 <div class="stage">
 <div class="container">
 
-  <!-- 앱 바: 제목 + 탭 -->
+  <!-- 상단 바: 제목 + 탭 -->
   <header class="appbar">
     <div class="appbar-top">
       <span class="brand-mark">🍊</span>
@@ -358,9 +394,8 @@
 
   <!-- Phase Banner -->
   <div class="phase-banner">
-    <div class="phase-pulse"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg></div>
+    <div class="phase-pulse"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg></div>
     <div class="phase-text">
-      <div class="phase-label">NOTICE</div>
       <div class="phase-name" id="phaseName">로딩 중...</div>
     </div>
   </div>
@@ -374,65 +409,47 @@
         <div class="step-badge">1</div>
         날짜 선택
         <div class="legend">
-          <div class="leg-item"><div class="leg-dot" style="background:#F57C00;"></div>선택</div>
-          <div class="leg-item"><div class="leg-dot" style="background:#FFF3E0;border:1px solid #FFCC80;"></div>범위</div>
-          <div class="leg-item"><div class="leg-dot" style="background:#f0f0f0;border:1px solid #ddd;"></div>예약불가</div>
+          <div class="leg-item"><span class="leg-x"></span>예약불가</div>
         </div>
       </div>
 
       <!-- 입실 < > 퇴실 -->
       <div class="datebar">
         <button type="button" class="db-box in active" id="dbIn">
-          <div class="db-lbl">입실</div>
-          <div class="db-date empty" id="dbInDate">날짜 선택</div>
-          <div class="db-time">14:00부터</div>
+          <div class="db-date empty" id="dbInDate"></div>
+          <div class="db-lbl">입실 <span class="db-time" id="dbInTime"></span></div>
         </button>
         <div class="db-mid">
-          <span class="db-nights" id="dbNights">– 박</span>
+          <span class="db-nights" id="dbNights"></span>
           <button type="button" class="clear-btn" onclick="clearSelection()">초기화</button>
         </div>
         <button type="button" class="db-box out" id="dbOut">
-          <div class="db-lbl">퇴실</div>
-          <div class="db-date empty" id="dbOutDate">날짜 선택</div>
-          <div class="db-time">11:00까지</div>
+          <div class="db-date empty" id="dbOutDate"></div>
+          <div class="db-lbl">퇴실 <span class="db-time" id="dbOutTime"></span></div>
         </button>
       </div>
 
       <div class="cal-wrapper">
-        <!-- Month 1 -->
         <div>
           <div class="month-nav">
             <button class="nav-btn" id="prevBtn" onclick="prevMonth()">‹</button>
-            <div class="month-title" id="month1Title"></div>
+            <div class="month-title" id="monthTitle"></div>
             <button class="nav-btn" onclick="nextMonth()">›</button>
           </div>
           <div class="weekdays">
             <div class="wd">일</div><div class="wd">월</div><div class="wd">화</div>
             <div class="wd">수</div><div class="wd">목</div><div class="wd">금</div><div class="wd">토</div>
           </div>
-          <div class="days" id="month1Days"></div>
+          <div class="days" id="monthDays"></div>
         </div>
-        <!-- Month 2 (스크립트 연동용, 화면 미표시) -->
-        <div class="cal-month2">
-          <div class="month-title" id="month2Title"></div>
-          <div class="days" id="month2Days"></div>
-        </div>
-      </div>
-
-      <!-- Selection summary (원본 연동 유지, 화면 미표시) -->
-      <div class="sel-summary" id="selSummary">
-        <div class="sel-dates" id="selCheckIn">입실 :</div>
-        <div class="sel-dates" id="selCheckOut">퇴실 :</div>
-        <div class="sel-nights" id="selNights"></div>
       </div>
 
       <div class="cost-card">
         <div class="cost-top">
-          <div class="cost-label">이용료</div>
-          <div class="cost-amount" id="costAmount">-원</div>
+          <div class="cost-amount" id="costAmount"></div>
         </div>
-        <div class="cost-nights-txt" id="costNightsTxt">-박 × 50,000원</div>
-        <div class="capped-notice" id="cappedNotice">✅ 4박 초과시에도 최대이용료 (200,000원)가 적용됩니다.</div>
+        <div class="cost-nights-txt" id="costNightsTxt"></div>
+        <div class="capped-notice" id="cappedNotice"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>4박 초과시에도 최대이용료 (200,000원)가 적용됩니다.</div>
       </div>
 
       <div class="blocked-notice" id="blockedNotice">
@@ -502,7 +519,8 @@
       <div class="success-icon">✓</div>
       <div class="success-text">
         <h2>접수 완료</h2>
-        <p>신청내역이 이메일로 발송되었습니다.<br>경영지원팀에서 최종 확인 후 확정 메일 보내드립니다. 48시간 내 확정안내를 받지 못하신 경우, 담당자에게 연락 부탁드립니다.</p>
+        <p>신청내역이 이메일로 발송되었습니다.<br>경영지원팀에서 최종 확인 후 확정 메일 보내드립니다.</p>
+        <p>예약은 접수 가능 시 통상 즉시 확정되나, 일정 중복 방지를 최종 확인하기 위해 담당자가 최종확인 후 확정 안내를 드리고 있습니다.<br><strong>(신청접수 24시간 이내 확정 안내)</strong></p>
       </div>
     </div>
     <div class="success-detail" id="successDetail"></div>
@@ -527,17 +545,26 @@ const CONFIG = {
 
   halfYear: '2025-H2',
 
+  // ★ 입실·퇴실 시간 (화면 표시용)
+  checkInTime:  '08:00',
+  checkOutTime: '11:00',
+
+  // ★ 이용료
+  pricePerNight: 50000,
+  maxCost:       200000,
+
   // ★ Google Calendar API 설정
   gcalApiKey: 'AIzaSyDw_8OGTjnh9OzBD3bbecLHZXuTMdzLXBk',
   gcalIds: [
-
-
     'babbd2096f9bb2c81dfec6b689fd6d227799bbad99cf236f5fe906a8677483e9@group.calendar.google.com' // 예약불가일(웹표시용)
   ],
 
   bookedRanges: []  // Google Calendar에서 자동으로 채워짐
 };
 /* ========================================================= */
+
+const $ = id => document.getElementById(id);
+const WEEKDAYS = ['일','월','화','수','목','금','토'];
 
 // ── State ──────────────────────────────────────────────────
 let viewYear, viewMonth;
@@ -548,11 +575,30 @@ const today = new Date(); today.setHours(0,0,0,0);
 function init() {
   viewYear  = today.getFullYear();
   viewMonth = today.getMonth();
+
+  revealWhenFontsReady();
+
+  $('dbInTime').textContent  = CONFIG.checkInTime + '부터';
+  $('dbOutTime').textContent = CONFIG.checkOutTime + '까지';
+  // 입실 영역 클릭: 처음부터 다시 선택 / 퇴실 영역 클릭: 퇴실일만 다시 선택
+  $('dbIn').addEventListener('click', clearSelection);
+  $('dbOut').addEventListener('click', clearCheckOut);
+
   renderPhase();
   fetchPhaseInfo();
-  renderCalendars();
+  renderCalendar();
+  updateSummary();
   initCalEvents();
   fetchCalendarEvents();
+}
+
+// ── 글꼴 준비 후 패널 표시 ────────────────────────────────
+// 화면에 쓰는 굵기(400·500·700)의 글꼴을 다 받으면 패널을 보여 준다.
+// 받지 못해도 CSS 가 0.8초 뒤에 패널을 보여 주므로 화면이 비는 일은 없다.
+function revealWhenFontsReady() {
+  const show = () => document.documentElement.classList.add('fonts-ready');
+  if (!document.fonts || !document.fonts.load) return show();
+  Promise.all(['400', '500', '700'].map(w => document.fonts.load(w + ' 14px Pretendard'))).then(show, show);
 }
 
 // ── Google Calendar 예약불가일 조회 ───────────────────────
@@ -594,35 +640,33 @@ async function fetchCalendarEvents() {
   }
 
   CONFIG.bookedRanges = ranges;
-  renderCalendars();
+  renderCalendar();
 }
 
 // ── Calendar event delegation (컨테이너에 한 번만 등록) ──────
 function initCalEvents() {
-  ['month1Days', 'month2Days'].forEach(id => {
-    const el = document.getElementById(id);
+  const el = $('monthDays');
 
-    el.addEventListener('click', e => {
-      const cell = e.target.closest('[data-date]');
-      if (!cell) return;
-      onDayClick(new Date(cell.dataset.date + 'T00:00:00'));
-    });
+  el.addEventListener('click', e => {
+    const cell = e.target.closest('[data-date]');
+    if (!cell) return;
+    onDayClick(new Date(cell.dataset.date + 'T00:00:00'));
+  });
 
-    el.addEventListener('mouseover', e => {
-      if (!checkIn || checkOut) return;
-      const cell = e.target.closest('[data-date]');
-      if (!cell) return;
-      const d = new Date(cell.dataset.date + 'T00:00:00');
-      if (!hoverDate || hoverDate.getTime() !== d.getTime()) {
-        hoverDate = d;
-        renderCalendars();
-      }
-    });
+  el.addEventListener('mouseover', e => {
+    if (!checkIn || checkOut) return;
+    const cell = e.target.closest('[data-date]');
+    if (!cell) return;
+    const d = new Date(cell.dataset.date + 'T00:00:00');
+    if (!hoverDate || hoverDate.getTime() !== d.getTime()) {
+      hoverDate = d;
+      renderCalendar();
+    }
+  });
 
-    el.addEventListener('mouseleave', () => {
-      if (!checkIn || checkOut) return;
-      if (hoverDate !== null) { hoverDate = null; renderCalendars(); }
-    });
+  el.addEventListener('mouseleave', () => {
+    if (!checkIn || checkOut) return;
+    if (hoverDate !== null) { hoverDate = null; renderCalendar(); }
   });
 }
 
@@ -636,14 +680,12 @@ function getPhase() {
 }
 
 function renderPhase() {
-  const p  = getPhase();
-  const n1 = document.getElementById('phase1Notice');
-  if (p === 1) n1.style.display = 'block';
+  if (getPhase() === 1) $('phase1Notice').style.display = 'block';
 }
 
-// ★ 상단 "현재 신청 기간" 텍스트는 노션 시스템설정 DB의 PhaseInfo 값을 가져와 표시
+// ★ 상단 안내 문구는 노션 시스템설정 DB의 PhaseInfo 값을 가져와 표시
 async function fetchPhaseInfo() {
-  const nameEl = document.getElementById('phaseName');
+  const nameEl = $('phaseName');
   try {
     const res  = await fetch(CONFIG.phaseInfoUrl);
     const data = await res.json();
@@ -654,48 +696,41 @@ async function fetchPhaseInfo() {
 }
 
 // ── Calendar ──────────────────────────────────────────────
-function renderCalendars() {
-  const m2y = viewMonth === 11 ? viewYear + 1 : viewYear;
-  const m2m = viewMonth === 11 ? 0 : viewMonth + 1;
-
-  document.getElementById('month1Title').textContent = fmtMonth(viewYear, viewMonth);
-  document.getElementById('month2Title').textContent = fmtMonth(m2y, m2m);
-
-  renderMonth('month1Days', viewYear, viewMonth);
-  renderMonth('month2Days', m2y, m2m);
-
-  const prevBtn = document.getElementById('prevBtn');
-  prevBtn.disabled = (viewYear === today.getFullYear() && viewMonth === today.getMonth());
+function renderCalendar() {
+  $('monthTitle').textContent = fmtMonth(viewYear, viewMonth);
+  renderMonth($('monthDays'), viewYear, viewMonth);
+  $('prevBtn').disabled = (viewYear === today.getFullYear() && viewMonth === today.getMonth());
 }
 
-function renderMonth(id, year, month) {
-  const container = document.getElementById(id);
+function renderMonth(container, year, month) {
   container.innerHTML = '';
-  const firstDay   = new Date(year, month, 1).getDay();
+  const firstDay    = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  // 표시할 기간: 퇴실일이 정해지기 전에는 마우스가 올라간 날짜까지 미리 보여 준다
+  const rangeEnd = checkOut || (checkIn ? hoverDate : null);
+  const hasRange = checkIn && rangeEnd && rangeEnd.getTime() !== checkIn.getTime();
+  const from = hasRange ? Math.min(checkIn, rangeEnd) : null;
+  const to   = hasRange ? Math.max(checkIn, rangeEnd) : null;
 
   for (let i = 0; i < firstDay; i++) addCell(container, '', ['empty']);
 
   for (let d = 1; d <= daysInMonth; d++) {
-    const date   = new Date(year, month, d);
-    const classes = ['day'];
+    const date      = new Date(year, month, d);
+    const time      = date.getTime();
+    const classes   = ['day'];
     const isPast    = date < today;
-    const isToday   = date.getTime() === today.getTime();
     const isBlocked = isBookedDate(date);
 
-    if (isToday)   classes.push('today');
-    if (isPast || isBlocked) {
-      classes.push(isBlocked ? 'blocked' : 'disabled');
-    }
+    if (time === today.getTime()) classes.push('today');
+    if (isPast || isBlocked)      classes.push(isBlocked ? 'blocked' : 'disabled');
 
-    // Range classes
-    const rangeEnd = checkOut ? checkOut : (checkIn && !checkOut ? hoverDate : null);
-    if (checkIn) {
-      const s = checkIn <= (rangeEnd || checkIn) ? checkIn : (rangeEnd || checkIn);
-      const e = checkIn <= (rangeEnd || checkIn) ? (rangeEnd || checkIn) : checkIn;
-      if (date.getTime() === checkIn.getTime())              classes.push('check-in');
-      if (checkOut && date.getTime() === checkOut.getTime()) classes.push('check-out');
-      if (rangeEnd && date > s && date < e)                  classes.push('in-range');
+    if (checkIn  && time === checkIn.getTime())  classes.push('check-in');
+    if (checkOut && time === checkOut.getTime()) classes.push('check-out');
+    if (hasRange) {
+      if (time === from)             classes.push('range-start');
+      if (time === to)               classes.push('range-end');
+      if (time > from && time < to)  classes.push('in-range');
     }
 
     const cell = addCell(container, d, classes);
@@ -720,61 +755,60 @@ function onDayClick(date) {
     else { checkOut = date; }
   }
   hoverDate = null;
-  renderCalendars();
+  renderCalendar();
   updateSummary();
 }
 
 function clearSelection() {
   checkIn = checkOut = hoverDate = null;
-  renderCalendars();
+  renderCalendar();
+  updateSummary();
+}
+
+function clearCheckOut() {
+  if (!checkIn || !checkOut) return;
+  checkOut = null;
+  renderCalendar();
   updateSummary();
 }
 
 function prevMonth() {
   if (viewMonth === 0) { viewYear--; viewMonth = 11; } else viewMonth--;
-  renderCalendars();
+  renderCalendar();
 }
 function nextMonth() {
   if (viewMonth === 11) { viewYear++; viewMonth = 0; } else viewMonth++;
-  renderCalendars();
+  renderCalendar();
 }
 
 // ── Summary & Cost ────────────────────────────────────────
+function calcStay(inDate, outDate) {
+  const nights = Math.round((outDate - inDate) / 864e5);
+  const cost   = Math.min(nights * CONFIG.pricePerNight, CONFIG.maxCost);
+  return { nights, cost };
+}
+
 function updateSummary() {
-  const sumEl = document.getElementById('selSummary');
+  const stay = (checkIn && checkOut) ? calcStay(checkIn, checkOut) : null;
 
-  if (checkIn && checkOut) {
-    const nights = Math.round((checkOut - checkIn) / 864e5);
-    const cost   = Math.min(nights * 50000, 200000);
+  // 상단 입실 · 퇴실 표시
+  $('dbInDate').textContent  = checkIn  ? fmtShort(checkIn)  : '날짜 선택';
+  $('dbOutDate').textContent = checkOut ? fmtShort(checkOut) : '날짜 선택';
+  $('dbInDate').classList.toggle('empty', !checkIn);
+  $('dbOutDate').classList.toggle('empty', !checkOut);
+  $('dbIn').classList.toggle('active', !checkIn);
+  $('dbOut').classList.toggle('active', !!checkIn && !checkOut);
+  $('dbNights').textContent = stay ? stay.nights + '박 ' + (stay.nights + 1) + '일' : '– 박';
+  $('dbNights').classList.toggle('on', !!stay);
 
-    document.getElementById('selCheckIn').textContent  = '입실 : ' + fmt(checkIn) + ' 오후 2시부터';
-    document.getElementById('selCheckOut').textContent = '퇴실 : ' + fmt(checkOut) + ' 오전 11시까지';
-    document.getElementById('selNights').textContent   = nights + '박 ' + (nights + 1) + '일';
-    document.getElementById('costNightsTxt').textContent = nights + '박 × 50,000원';
-    document.getElementById('costAmount').textContent    = cost.toLocaleString() + '원';
+  // 이용료
+  $('costNightsTxt').textContent = (stay ? stay.nights : '-') + '박 × ' + won(CONFIG.pricePerNight);
+  $('costAmount').textContent    = stay ? won(stay.cost) : '-원';
 
-    const hasBlocked = rangeHasBlockedDate(checkIn, checkOut);
-    document.getElementById('blockedNotice').style.display = hasBlocked ? 'block' : 'none';
-    document.getElementById('submitBtn').disabled = hasBlocked;
-
-    sumEl.style.visibility = 'visible';
-  } else if (checkIn) {
-    document.getElementById('selCheckIn').textContent  = '입실 : ' + fmt(checkIn) + ' 14:00부터';
-    document.getElementById('selCheckOut').textContent = '퇴실일을 선택해 주세요';
-    document.getElementById('selNights').textContent   = '';
-    document.getElementById('costNightsTxt').textContent = '-박 × 50,000원';
-    document.getElementById('costAmount').textContent    = '-원';
-    document.getElementById('blockedNotice').style.display = 'none';
-
-  } else {
-    document.getElementById('selCheckIn').textContent  = '입실 :';
-    document.getElementById('selCheckOut').textContent = '퇴실 :';
-    document.getElementById('selNights').textContent   = '';
-    document.getElementById('costNightsTxt').textContent = '-박 × 50,000원';
-    document.getElementById('costAmount').textContent    = '-원';
-    document.getElementById('blockedNotice').style.display = 'none';
-    document.getElementById('submitBtn').disabled = false;
-  }
+  // 선택 기간에 예약불가일이 있으면 안내하고 제출을 막는다
+  const hasBlocked = !!stay && rangeHasBlockedDate(checkIn, checkOut);
+  $('blockedNotice').style.display = hasBlocked ? 'block' : 'none';
+  $('submitBtn').disabled = hasBlocked;
 }
 
 // ── Booked date check ─────────────────────────────────────
@@ -797,14 +831,14 @@ function rangeHasBlockedDate(start, end) {
 }
 
 // ── Validation ────────────────────────────────────────────
-function showErr(id, show) { document.getElementById(id).style.display = show ? 'block' : 'none'; }
+function showErr(id, show) { $(id).style.display = show ? 'block' : 'none'; }
 
 function validate() {
   let ok = true;
-  const name  = document.getElementById('name').value.trim();
-  const dept  = document.getElementById('dept').value;
-  const email = document.getElementById('email').value.trim();
-  const phone = document.getElementById('phone').value.trim();
+  const name  = $('name').value.trim();
+  const dept  = $('dept').value;
+  const email = $('email').value.trim();
+  const phone = $('phone').value.trim();
 
   if (!name)                                             { showErr('nameErr', true);  ok = false; } else showErr('nameErr', false);
   if (!dept)                                             { showErr('deptErr', true);  ok = false; } else showErr('deptErr', false);
@@ -820,50 +854,46 @@ async function submitForm() {
 
   // ★ 제출 직전 재확인: 동시 신청으로 인한 일정 중복을 방지하기 위해
   //   화면에 표시된 캘린더 데이터를 믿지 않고 최신 상태를 다시 조회한다.
-  const submitBtnRef = document.getElementById('submitBtn');
-  submitBtnRef.disabled    = true;
-  submitBtnRef.textContent = '예약 가능 여부 확인 중...';
+  const btn = $('submitBtn');
+  btn.disabled    = true;
+  btn.textContent = '예약 가능 여부 확인 중...';
 
   await fetchCalendarEvents();
 
   if (rangeHasBlockedDate(checkIn, checkOut)) {
-    submitBtnRef.disabled    = false;
-    submitBtnRef.textContent = '신청서 제출하기';
+    btn.disabled    = false;
+    btn.textContent = '신청서 제출하기';
     alert('선택하신 기간 중 다른 신청과 겹치는 날짜가 발생했습니다.\n캘린더가 최신 상태로 갱신되었으니, 날짜를 다시 선택해 주세요.');
     clearSelection();
     return;
   }
 
-  const nights  = Math.round((checkOut - checkIn) / 864e5);
-  const cost    = Math.min(nights * 50000, 200000);
-  const phase   = getPhase();
+  const { nights, cost } = calcStay(checkIn, checkOut);
 
   const payload = {
-    name:        document.getElementById('name').value.trim(),
-    dept:        document.getElementById('dept').value,
-    email:       document.getElementById('email').value.trim(),
-    phone:       document.getElementById('phone').value.trim(),
+    name:        $('name').value.trim(),
+    dept:        $('dept').value,
+    email:       $('email').value.trim(),
+    phone:       $('phone').value.trim(),
     checkIn:     toISO(checkIn),
     checkOut:    toISO(checkOut),
     nights,
     cost,
-    phase:       'Phase' + phase,
+    phase:       'Phase' + getPhase(),
     halfYear:    CONFIG.halfYear,
     submittedAt: new Date().toISOString()
   };
 
-  const btn = document.getElementById('submitBtn');
-  btn.disabled    = true;
   btn.textContent = '제출 중...';
 
   try {
-    if (CONFIG.webhookUrl !== 'YOUR_MAKE_WEBHOOK_URL') {
-      await fetch(CONFIG.webhookUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-    }
+    const res = await fetch(CONFIG.webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    // 웹훅이 신청을 받지 못한 경우(비활성화·대기열 초과·서버 장애)에는 접수 완료로 넘어가지 않는다
+    if (!res.ok) throw new Error('웹훅 응답 오류: ' + res.status);
     showSuccess(payload);
   } catch (e) {
     btn.disabled    = false;
@@ -873,31 +903,42 @@ async function submitForm() {
 }
 
 function showSuccess(p) {
-  document.getElementById('formSection').style.display    = 'none';
-  document.getElementById('successScreen').style.display  = 'block';
+  $('formSection').style.display   = 'none';
+  $('successScreen').style.display = 'block';
 
   const rows = [
     ['신청자', p.name],
     ['부서',   p.dept],
     ['이메일', p.email],
     ['휴대폰', p.phone.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3')],
-    ['입실', p.checkIn + ' 14:00'],
-    ['퇴실', p.checkOut + ' 11:00'],
+    ['입실', p.checkIn + ' ' + CONFIG.checkInTime],
+    ['퇴실', p.checkOut + ' ' + CONFIG.checkOutTime],
     ['이용 박수', p.nights + '박'],
-    ['이용금액', p.cost.toLocaleString() + '원'],
-    // ['신청 구분', p.phase]  // 제거
+    ['이용금액', won(p.cost)]
   ];
-  document.getElementById('successDetail').innerHTML = rows.map(([k,v]) =>
-    `<div class="detail-row"><span class="detail-key">${k}</span><span class="detail-val">${v}</span></div>`
-  ).join('');
+
+  // 입력값을 그대로 화면에 넣으므로 innerHTML 대신 textContent 사용
+  const box = $('successDetail');
+  box.innerHTML = '';
+  rows.forEach(([k, v]) => {
+    const row = document.createElement('div');
+    row.className = 'detail-row';
+    const key = document.createElement('span');
+    key.className = 'detail-key';
+    key.textContent = k;
+    const val = document.createElement('span');
+    val.className = 'detail-val';
+    val.textContent = v;
+    row.appendChild(key);
+    row.appendChild(val);
+    box.appendChild(row);
+  });
 }
 
 // ── Utils ─────────────────────────────────────────────────
-function fmt(d) {
-  const days = ['일','월','화','수','목','금','토'];
-  return d.getFullYear() + '년 ' + (d.getMonth()+1) + '월 ' + d.getDate() + '일(' + days[d.getDay()] + ')';
-}
-function fmtMonth(y, m) { return y + '년 ' + (m+1) + '월'; }
+function fmtShort(d) { return (d.getMonth() + 1) + '.' + d.getDate() + ' (' + WEEKDAYS[d.getDay()] + ')'; }
+function fmtMonth(y, m) { return y + '년 ' + (m + 1) + '월'; }
+function won(n) { return n.toLocaleString('ko-KR') + '원'; }
 function toISO(d) {
   const y  = d.getFullYear();
   const m  = String(d.getMonth() + 1).padStart(2, '0');
@@ -906,45 +947,6 @@ function toISO(d) {
 }
 
 init();
-</script>
-</body>
-</html>
-
-
-<script>
-/* =========================================================
-   화면 표시 전용 보조 스크립트 (원본 로직 수정 없음)
-   - 원본 updateSummary() 실행 후, 상단 '입실 < > 퇴실' 바만 갱신
-   ========================================================= */
-(function () {
-  const W = ['일','월','화','수','목','금','토'];
-  const f = d => (d.getMonth() + 1) + '.' + d.getDate() + ' (' + W[d.getDay()] + ')';
-  const $ = id => document.getElementById(id);
-
-  function paintDateBar() {
-    const inEl = $('dbInDate'), outEl = $('dbOutDate'), nEl = $('dbNights');
-    inEl.textContent  = checkIn  ? f(checkIn)  : '날짜 선택';
-    outEl.textContent = checkOut ? f(checkOut) : '날짜 선택';
-    inEl.classList.toggle('empty', !checkIn);
-    outEl.classList.toggle('empty', !checkOut);
-    $('dbIn').classList.toggle('active', !checkIn);
-    $('dbOut').classList.toggle('active', !!checkIn && !checkOut);
-    const n = (checkIn && checkOut) ? Math.round((checkOut - checkIn) / 864e5) : 0;
-    nEl.textContent = n ? n + '박 ' + (n + 1) + '일' : '– 박';
-    nEl.classList.toggle('on', !!n);
-  }
-
-  const originalUpdateSummary = updateSummary;
-  updateSummary = function () { originalUpdateSummary.apply(this, arguments); paintDateBar(); };
-
-  // 입실 영역 클릭: 처음부터 다시 선택 / 퇴실 영역 클릭: 퇴실일만 다시 선택
-  $('dbIn').addEventListener('click', () => clearSelection());
-  $('dbOut').addEventListener('click', () => {
-    if (checkIn && checkOut) { checkOut = null; renderCalendars(); updateSummary(); }
-  });
-
-  paintDateBar();
-})();
 </script>
 </body>
 </html>
